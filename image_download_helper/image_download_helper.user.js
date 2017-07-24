@@ -4,7 +4,8 @@
 // @version    0.05
 // @description  add keyboard shortcuts to open and download image files quicker
 // @match      *
-// @include *
+// @include /^https?:\/\/.*tumblr.*/
+// @include /^https?:\/\/.*imgur.*/
 // @copyright  Fuck copyrights
 //// @require  	   https://code.jquery.com/jquery-1.11.2.min.js
 // @require     https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
@@ -15,6 +16,8 @@
 //// @noframes
 /*jshint multistr: true */
 // ==/UserScript==
+//TODO: -maybe implement a better save-as system? ie https://gist.github.com/derjanb/4431f674124ef1b11e30
+//      -clean up
 
 document.addEventListener ("DOMContentLoaded", DOM_ContentReady);
 
