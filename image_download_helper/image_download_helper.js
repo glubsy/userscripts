@@ -12,29 +12,231 @@
 // @grant    GM_download
 // @grant    GM_addStyle
 // @run-at      document-start
-// @noframes
+//// @noframes
 /*jshint multistr: true */
 // ==/UserScript==
 
-/* TODO
- * check iframes structues, traverse them instead of img tags
- * check back on the css issue, demo page
- * investigate DM_download
- * create multiple tooltips, generated
- * investigate reblogs in Eza's script
- * /
+document.addEventListener ("DOMContentLoaded", DOM_ContentReady);
+//document.addEventListener ("load", DOM_ContentReady2);
 
-/*==================================================
-//  Update size of to-be-downloaded-file to best size available from server
-//==================================================*/
+/*
+//display element under mouse
+$(window).mouseenter(function(e) {
+    var x = e.clientX, y = e.clientY,
+        elementMouseIsOver = document.elementFromPoint(x, y);
 
-//document.addEventListener ("DOMContentLoaded", DOM_ContentReady);
+    alert(elementMouseIsOver);
+});
+*/
+
+//=====================================================
+
+var modkey_pressed = false, pointed_obj, pointed_div;
+var img_links, img_links_iframe, class_links, currentLink, divs;
+var extensions = ["jpg", "jpeg", "png", "gif", "mp4", "webm", "gifv", "tiff", "bmp"];
+
+$(document).ready(get_iframes_id());
+
+function DOM_ContentReady () { gatherImages(); }
+
+function gatherImages(){
+	let myimages =  window.document.images;
+	for (let i=0; i <= myimages.length; i++){
+		if (myimages[i] === undefined) { continue; }
+		if (myimages[i].src.indexOf("avatar") > 0) { continue; }
+		myimages[i].onmouseenter = function (){ updateLink(this.src); pointed_obj = this; };
+		console.log("images: " + myimages[i].src);
+	}
+}
+
+
+img_links = document.getElementsByTagName('img');
+class_links = document.getElementsByClassName('photoset_photo');
+//console.log("length: " +  class_links.length);
+
+//============================================================
+// JUST TESTING THIS:
+var IMGmatches = [], IMGelems = document.getElementsByTagName("img"),
+	iframes = document.getElementsByTagName('iframe'), l = IMGelems.length,
+	m = iframes.length, i, j;
+for( let i=0; i<l; i++) IMGmatches[i] = IMGelems[i];
+for( let j=0; j<m; j++) {
+	IMGelems = iframes[j].contentDocument.getElementsByTagName("img");
+	l = IMGelems.length;
+	for( i=0; i<l; i++) IMGmatches.push(IMGelems[i]);
+}
+console.log("IMGelems: " + IMGmatches + IMGelems);
+
+//==========================================================
+
+divs = document.getElementsByTagName('div');
+//console.log("img_links.length is :" + img_links.length);
+
+isMediaDisplayed();
+
+
+function get_iframes_id(){
+	console.log("get_iframes_id()");
+	//$('iframe').each(function(){
+	sets = document.getElementById("photoset_iframe_163267641712");
+	if (sets === null) { return;}
+	len = sets.length;
+	console.log("sets: " + sets + len);
+	//$('.photoset').each(function(){  //.photoset works?
+		//var src = $(this).attr("src"); //photoset_number
+		var src = sets[0].src;
+		console.log("photoset: " + src);
+		if ( src === undefined ) { return; }
+		var iframe_numb = "photoset_iframe_" + src.replace(/\/post\/(\d+)\/photoset_iframe.*/, '$1');
+		console.log("got:" + iframe_numb);
+
+		var iframe = document.getElementById(iframe_numb);
+		var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+		console.log("iframe innerdoc: " + iframe + " " + innerDoc);
+
+		//TESTING
+		if (iframe.addEventListener)
+			iframe.addEventListener("load", function(){ console.log("TESTLOADED");}, false);
+		else
+			iframe.attachEvent("onload", function(){ console.log("TESTLOADEDELSE");});
+		//END TESTING
+
+		iframe.addEventListener("load", function() {
+			console.log("LOADED iFRAME!");
+			iframe.addEventListener("keydown", function(event){
+				if( event.keyCode==87 && event.shiftKey ) {
+					modkey_pressed = true;
+					downloadThis(currentLink);
+				}
+				console.log("%c NEWKey currentLink        :" + currentLink, 'background: #222; color: #bb55cc' );
+			});
+
+			img_links_iframe = innerDoc.getElementsByTagName('img');  //	or img_links_iframe = innerDoc.links; ??
+			console.log("img_links_iframe: " + img_links_iframe.length);
+			for(let i =0; i < img_links_iframe.length; i++){
+				img_links_iframe[i].onmouseenter = function (){ updateLink(this.src); pointed_obj = this; };
+				console.log("element: " + img_links_iframe[i].src);
+			}
+
+		},false);
+	}
+//					   );
+//}
+
+/*
+for(var i =0; i < img_links.length; i++){
+	console.log("img_links[" + i + "] is " + img_links[i] );
+}*/
+
+/*
+for(var i =0; i < img_links.length; i++){
+    img_links[i].onmouseover = function(){updateLink(this.src);};
+    img_links[i].onfocus= function(){updateLink(this.src);};
+}
+*/
+//});
+
+//=======================================================
+
+function isMediaDisplayed(){
+	let extension = window.location.pathname.replace(/.*\./, '').toLowerCase();
+	if (extensions.indexOf(extension) < 0) { return false; }
+	else { currentLink = window.location.href; return true; }
+}
+
+function updateLink(arg) {
+	console.log("%c BEFORE updateLink  :" + currentLink,'background: #222; color: #ccaa99');
+	currentLink = arg;
+	console.log("%c AFTER updateLink   :" + currentLink ,'background: #222; color: #bada99');
+}
+
+function downloadThis(thelink) {
+	if( !modkey_pressed ) {
+		return;
+	}
+	//GM_openInTab( currentLink );
+	console.log("%c Downloading currentlink :" + currentLink, 'background: #222; color: #bada55' );
+	checkSize(0, thelink);
+	console.log("%c new_url                 :" + new_url, 'background: #222; color: #f46b42');
+	if ( new_url.indexOf("NOLINK!") > -1) { return; }
+	//=========================================================
+	var filename = new_url.substring(new_url.lastIndexOf('/')+1);
+	GM_download({url: new_url, name: filename, saveAs: true});
+	//===========================================================*/
+	if ( window.location.href.substring("imgur") > -1) {
+		fadeImg(pointed_div);
+	}
+	else { fadeImg(pointed_obj); }
+
+	//togglePopup();
+	//document.getElementById('myPopup').innerHTML = filename;
+}
+
+
+
+document.addEventListener("keydown", function(event){
+	if( event.keyCode==87 && event.shiftKey && !isMediaDisplayed()) {
+		modkey_pressed = true;
+		downloadThis(currentLink);
+	}
+	else if (isMediaDisplayed() && currentLink !== undefined ){  //Download with only one key press
+		var filename = currentLink.substring(currentLink.lastIndexOf('/')+1);
+		GM_download({url: currentLink, name: filename, saveAs: true});
+	}
+	console.log("%c Key currentLink        :" + currentLink, 'background: #222; color: #bb55cc' );
+});
+
+document.addEventListener("keyup", function(event){
+	//if( event.keyCode==87 && event.shiftKey) {
+	//    modkey_pressed = false;
+	//}
+	if (event.keycode!==0) {
+		modkey_pressed = false;
+		//console.log("ctrl_pressed is:" + modkey_pressed);
+	}
+});
+
+document.addEventListener("keypress", onKeyPress);
+
+function onKeyPress(event){
+	if( event.keyCode!=87 && !event.shiftKey ) {
+		modkey_pressed = false;
+	}
+}
+
+document.addEventListener("mousemove",function(event){ //or "mousemove" or "mouseover" or mouseenter
+	if( event.keyCode!=87 && !event.shiftKey ) {
+		//get_iframes_id();
+		monitorLinks();
+	}
+	//else if ( event.shiftKey ) {
+	//	getCoords(event);
+	//}
+});
+
+function monitorLinks(){
+	for(var i =0; i < img_links.length; i++){
+		img_links[i].onmouseenter = function(){
+			console.log("img_links[" + i + "]: " + img_links[i] + " with: " + this.src);
+			updateLink(this.src);
+			pointed_obj = this;
+		};
+	}
+	for(var j =0; i < divs.length; i++){
+		divs[i].onmouseenter = function(){
+			pointed_div = this;
+		};
+	}
+}
+
+//====================================================================
+// Tumblr/imgur specific checks
 
 var sizes = [ '_raw.', '_1280.' ];
 var new_url;
 
 function checkSize(index, url) {
-	if (url.indexOf("NOLINK!") > -1) { new_url = url; return; }
+	if (url === undefined) { console.log("checkSize(): arg was undefined."); new_url = "NOLINK!"; return; }
 	if (url.indexOf("tumblr") > -1) {
 		if(url.indexOf("avatar") > -1) { new_url = url ; return; }
 		if (index >= sizes.length) return;
@@ -59,109 +261,7 @@ function checkSize(index, url) {
 	else { new_url = url; return; }
 }
 
-/*
-//display element under mouse
-$(window).mouseenter(function(e) {
-    var x = e.clientX, y = e.clientY,
-        elementMouseIsOver = document.elementFromPoint(x, y);
 
-    alert(elementMouseIsOver);
-});
-*/
-
-//=====================================================
-
-var modkey_pressed = false, pointed_obj, pointed_div;
-
-var links = document.getElementsByTagName('img'),
-	//linkDisplay = document.getElementById('currentLink'),
-	currentLink = "NOLINK!",
-	divs = document.getElementsByTagName('div');
-
-/*
-for(var i =0; i < links.length; i++){
-    links[i].onmouseover = function(){updateLink(this.src);};
-    links[i].onfocus= function(){updateLink(this.src);};
-}
-*/
-
-//=======================================================
-
-function updateLink(newlink) {
-	console.log("%c BEEFORE updateLink :" + currentLink,'background: #222; color: #ccaa99');
-	currentLink = newlink;
-	console.log("%c AFTER updateLink   :" + currentLink ,'background: #222; color: #bada99');
-}
-
-function downloadThis(currentLink) {
-	if( !modkey_pressed ) {
-		return;
-	}
-	//GM_openInTab( currentLink );
-	console.log("%c Downloading currentlink :" + currentLink, 'background: #222; color: #bada55' );
-	checkSize(0, currentLink);
-	console.log("%c new_url                 :" + new_url, 'background: #222; color: #f46b42');
-	if ( new_url.indexOf("NOLINK!") > -1) { return; }
-	//=========================================================
-	var filename = new_url.substring(new_url.lastIndexOf('/')+1);
-	//GM_download({url: new_url, name: filename, saveAs: true});
-	//===========================================================*/
-	if ( window.location.href.substring("imgur") > -1) {
-		fadeImg(pointed_div);
-	}
-	else { fadeImg(pointed_obj); }
-
-	togglePopup();
-	document.getElementById('myPopup').innerHTML = filename;
-}
-
-
-
-
-document.addEventListener("keydown", function(event){
-	if( event.keyCode==87 && event.shiftKey) {
-		modkey_pressed = true;
-		downloadThis(currentLink);
-	}
-	console.log("%c Key currentlink        :" + currentLink, 'background: #222; color: #bb55cc' );
-});
-
-document.addEventListener("keyup", function(event){
-	//if( event.keyCode==87 && event.shiftKey) {
-	//    modkey_pressed = false;
-	//}
-	if (event.keycode!==0) {
-		modkey_pressed = false;
-		//console.log("ctrl_pressed is:" + modkey_pressed);
-	}
-});
-
-document.addEventListener("keypress", onKeyPress);
-
-function onKeyPress(event){
-	if( event.keyCode!=87 && !event.shiftKey ) {
-		modkey_pressed = false;
-	}
-}
-
-document.addEventListener("mousemove",function(event){ //or "mousemove" or "mouseover" or mouseenter
-	if( event.keyCode!=87 && !event.shiftKey ) {
-		for(var i =0; i < links.length; i++){
-			links[i].onmouseenter = function(){
-				updateLink(this.src);
-				pointed_obj = this;
-			};
-		}
-		for(var j =0; i < divs.length; i++){
-			divs[i].onmouseenter = function(){
-				pointed_div = this;
-			};
-		}
-	}
-	else if ( event.shiftKey ) {
-		getCoords(event);
-	}
-});
 
 //====================================================
 
@@ -170,7 +270,14 @@ function fadeImg(img){
 	img.style.opacity = "0.4";
 }
 
+
+
+/*function DOM_ContentReady () {
+	console.log ("==> 2nd part of script run.", new Date() );
+}*/
+
 /* /===================================================
+   // BROKEN POPUP
 
 function DOM_ContentReady () {
 	console.log ("==> 2nd part of script run.", new Date() );
