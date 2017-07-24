@@ -16,6 +16,14 @@
 /*jshint multistr: true */
 // ==/UserScript==
 
+/* TODO
+ * check iframes structues, traverse them instead of img tags
+ * check back on the css issue, demo page
+ * investigate DM_download
+ * create multiple tooltips, generated
+ * investigate reblogs in Eza's script
+ * /
+
 /*==================================================
 //  Update size of to-be-downloaded-file to best size available from server
 //==================================================*/
@@ -44,8 +52,8 @@ function checkSize(index, url) {
 		});
 	}
 	else if (url.indexOf("imgur.com") > -1) {
-		new_url = url.replace(/(https?:\/\/.*)&t.*/, '$1');
-		new_url = new_url.replace(/(https?:\/\/.*)g(\..*)/, '$1' + '$2' );
+		new_url = url.replace(/(https?:\/\/.*)&t.*/, '$1');  //remove imgur junk
+		new_url = new_url.replace(/(https?:\/\/.*)g(\..*)/, '$1' + '$2' ); //don't fetch thumbnail
 		console.log("imgur new link: " + new_url);
 	}
 	else { new_url = url; return; }
@@ -102,6 +110,9 @@ function downloadThis(currentLink) {
 		fadeImg(pointed_div);
 	}
 	else { fadeImg(pointed_obj); }
+
+	togglePopup();
+	document.getElementById('myPopup').innerHTML = filename;
 }
 
 
@@ -125,11 +136,13 @@ document.addEventListener("keyup", function(event){
 	}
 });
 
-document.addEventListener("keypress", function(event){
+document.addEventListener("keypress", onKeyPress);
+
+function onKeyPress(event){
 	if( event.keyCode!=87 && !event.shiftKey ) {
 		modkey_pressed = false;
 	}
-});
+}
 
 document.addEventListener("mousemove",function(event){ //or "mousemove" or "mouseover" or mouseenter
 	if( event.keyCode!=87 && !event.shiftKey ) {
@@ -145,6 +158,9 @@ document.addEventListener("mousemove",function(event){ //or "mousemove" or "mous
 			};
 		}
 	}
+	else if ( event.shiftKey ) {
+		getCoords(event);
+	}
 });
 
 //====================================================
@@ -154,5 +170,131 @@ function fadeImg(img){
 	img.style.opacity = "0.4";
 }
 
+/* /===================================================
+
 function DOM_ContentReady () {
+	console.log ("==> 2nd part of script run.", new Date() );
+	//$("head").append(' <style> \
+	GM_addStyle( '.popup {\
+position: fixed;\
+display: inline-block;\
+cursor: pointer;\
+-webkit-user-select: none;\
+-moz-user-select: none;\
+-ms-user-select: none;\
+user-select: none;\
+}\
+\
+.popup .popuptext {\
+visibility: hidden;\
+width: 160px;\
+background-color: #ffffff;\
+color: #ff0000;\
+text-align: center;\
+border-radius: 6px;\
+padding: 8px 0;\
+position: fixed;\
+z-index: 1;\
+bottom: 10%;\
+left: 50%;\
+margin-left: -80px;\
+}\
+\
+.popup .popuptext::after {\
+content: "after-test";\
+position: fixed;\
+margin-left: -5px;\
+border-width: 5px;\
+border-style: solid;\
+border-color: #555 transparent transparent transparent;\
+}\
+\
+.popup .show {\
+visibility: visible;\
+-webkit-animation: fadeIn 1s;\
+animation: fadeIn 0.5s;\
+}\
+\
+@-webkit-keyframes fadeIn {\
+from {opacity: 0;}\
+to {opacity: 1;}\
+}\
+\
+@keyframes fadeIn {\
+from {opacity: 0;}\
+to {opacity:1 ;}\
+}\
+' );
+	addGlobalStyle('.popup .popuptext { position: fixed; }');
+
+	$("body").append('<span class="popuptext" id="myPopup">TESQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQT</span>');
+	updateToolTipsStart();
 }
+
+var tooltips = document.querySelectorAll('.popuptext');
+//var x_coord, ycoord;
+var mousePosition = {x:0, y:0};
+
+function updateToolTips(){
+	tooltips = document.querySelectorAll('.popuptext');
+	for (i = 0; i < tooltips.length; i++){
+		console.log("tooltips:" + tooltips[i].id + " / " + tooltips.length);
+	}
+}
+
+
+function togglePopup() {
+	console.log("togglePopup()");
+	updateToolTipCoords();
+	var popup = document.getElementById("myPopup");
+	//popup.classList.toggle("show");
+	//setTimeout(function(){
+	//	popup.classList.toggle("show");
+	//}, 3000);
+}
+
+function getCoords(mouseMoveEvent) {
+	//x_coord = event.clientX + 'px';
+	//y_coord = event.clientY + 'px';
+	mousePosition.x = mouseMoveEvent.clientX + 'px';
+	mousePosition.y = mouseMoveEvent.clientY + 'px';
+}
+
+function updateToolTipCoords(){
+	//jQuery needed here
+	$("#myPopup").css('position', "fixed");
+	$("#myPopup").css('top', mousePosition.y);
+	$("#myPopup").css('left', mousePosition.x);
+	console.log("getCoords(): " + mousePosition.x + ", " + mousePosition.x);
+	for (var i = 0; i < tooltips.length; i++) {
+		tooltips[i].style.position = 'fixed';
+		tooltips[i].style.top = mousePosition.y;
+		tooltips[i].style.left = mousePosition.x;
+	}
+	//document.querySelector('.popup').style.top = y_coord +'px';
+	//document.querySelector('.popup').style.left = x_coord +'px';
+}
+
+function updateToolTipsStart(){
+	window.onmousemove = function updateTooltipPos(e){
+		var x = (e.clientX) + 'px',
+			y = (e.clientY) + 'px';
+		for (var i = 0; i < tooltips.length; i++) {
+			//console.log("tooltips:" + tooltips[i].id + " / " + tooltips.length);
+			tooltips[i].style.top = y;
+			tooltips[i].style.left = x;
+			console.log("update with:" + x + " " + y );
+		}
+	};
+}
+
+function addGlobalStyle(css) {
+	var head, style;
+	head = document.getElementsByTagName('head')[0];
+	if (!head) { return; }
+	style = document.createElement('style');
+	style.type = 'text/css';
+	style.innerHTML = css;
+	head.appendChild(style);
+}
+*/
