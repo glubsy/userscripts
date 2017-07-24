@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       Custom keyboard shortcuts
 // @namespace  test
-// @version    0.1
+// @version    0.03
 // @description  add keyboard + mouse shortcut to open images in new tab
 // @match      *
 // @include *
@@ -11,23 +11,12 @@
 // @grant    GM_openInTab
 // @grant    GM_download
 // @grant    GM_addStyle
-// @run-at      document-start
+// @run-at      document-idle
 //// @noframes
 /*jshint multistr: true */
 // ==/UserScript==
 
 document.addEventListener ("DOMContentLoaded", DOM_ContentReady);
-//document.addEventListener ("load", DOM_ContentReady2);
-
-/*
-//display element under mouse
-$(window).mouseenter(function(e) {
-    var x = e.clientX, y = e.clientY,
-        elementMouseIsOver = document.elementFromPoint(x, y);
-
-    alert(elementMouseIsOver);
-});
-*/
 
 //=====================================================
 
@@ -45,17 +34,16 @@ function gatherImages(){
 		if (myimages[i] === undefined) { continue; }
 		if (myimages[i].src.indexOf("avatar") > 0) { continue; }
 		myimages[i].onmouseenter = function (){ updateLink(this.src); pointed_obj = this; };
-		console.log("images: " + myimages[i].src);
+		console.log("gatherImages: " + myimages[i].src);
 	}
 }
 
 
 img_links = document.getElementsByTagName('img');
 class_links = document.getElementsByClassName('photoset_photo');
-//console.log("length: " +  class_links.length);
 
-//============================================================
-// JUST TESTING THIS:
+/*/============================================================
+// Just testing this, in case is becomes useful eventually:
 var IMGmatches = [], IMGelems = document.getElementsByTagName("img"),
 	iframes = document.getElementsByTagName('iframe'), l = IMGelems.length,
 	m = iframes.length, i, j;
@@ -65,76 +53,56 @@ for( let j=0; j<m; j++) {
 	l = IMGelems.length;
 	for( i=0; i<l; i++) IMGmatches.push(IMGelems[i]);
 }
-console.log("IMGelems: " + IMGmatches + IMGelems);
+//console.log("IMGelems: " + IMGmatches + IMGelems);
 
-//==========================================================
+//==========================================================*/
 
 divs = document.getElementsByTagName('div');
-//console.log("img_links.length is :" + img_links.length);
 
 isMediaDisplayed();
 
-
 function get_iframes_id(){
-	console.log("get_iframes_id()");
+	//console.log("get_iframes_id()");
+
 	//$('iframe').each(function(){
-	sets = document.getElementById("photoset_iframe_163267641712");
-	if (sets === null) { return;}
-	len = sets.length;
-	console.log("sets: " + sets + len);
-	//$('.photoset').each(function(){  //.photoset works?
-		//var src = $(this).attr("src"); //photoset_number
-		var src = sets[0].src;
-		console.log("photoset: " + src);
+	$('.photoset').each(function(){  //.photoset works?
+		var src = $(this).attr("src"); //photoset_number
 		if ( src === undefined ) { return; }
 		var iframe_numb = "photoset_iframe_" + src.replace(/\/post\/(\d+)\/photoset_iframe.*/, '$1');
-		console.log("got:" + iframe_numb);
+		console.log("get_iframes_id() found iframe:" + iframe_numb);
 
 		var iframe = document.getElementById(iframe_numb);
-		var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
-		console.log("iframe innerdoc: " + iframe + " " + innerDoc);
+		var innerDoc = iframe.contentDocument || iframe.contentWindow.document; //TODO: fix the error on cross-origin iframes
+		//console.log("get_iframes_id(): iframe innerdoc: " + iframe + " " + innerDoc);
 
-		//TESTING
+		/*TESTING deferring after fully loaded iframes
 		if (iframe.addEventListener)
 			iframe.addEventListener("load", function(){ console.log("TESTLOADED");}, false);
 		else
 			iframe.attachEvent("onload", function(){ console.log("TESTLOADEDELSE");});
-		//END TESTING
+		//END TESTING*/
 
 		iframe.addEventListener("load", function() {
-			console.log("LOADED iFRAME!");
-			iframe.addEventListener("keydown", function(event){
+			//console.log("get_iframes_id(): LOADED iFRAME!");
+			/*iframe.addEventListener("keydown", function(event){ //not needed apparently
 				if( event.keyCode==87 && event.shiftKey ) {
 					modkey_pressed = true;
 					downloadThis(currentLink);
 				}
-				console.log("%c NEWKey currentLink        :" + currentLink, 'background: #222; color: #bb55cc' );
-			});
+				console.log("%c get_iframes_id(): Key currentLink:" + currentLink, 'background: #222; color: #bb55cc' );
+			});*/
 
 			img_links_iframe = innerDoc.getElementsByTagName('img');  //	or img_links_iframe = innerDoc.links; ??
-			console.log("img_links_iframe: " + img_links_iframe.length);
+			//console.log("get_iframes_id(): img_links_iframe: " + img_links_iframe.length);
 			for(let i =0; i < img_links_iframe.length; i++){
-				img_links_iframe[i].onmouseenter = function (){ updateLink(this.src); pointed_obj = this; };
-				console.log("element: " + img_links_iframe[i].src);
+				img_links_iframe[i].onmousemove = function (){ updateLink(this.src); pointed_obj = this; };
+				//console.log("get_iframes_id(): img_links_iframes[" + i + "]: " + img_links_iframe[i].src);
 			}
 
 		},false);
 	}
-//					   );
-//}
-
-/*
-for(var i =0; i < img_links.length; i++){
-	console.log("img_links[" + i + "] is " + img_links[i] );
-}*/
-
-/*
-for(var i =0; i < img_links.length; i++){
-    img_links[i].onmouseover = function(){updateLink(this.src);};
-    img_links[i].onfocus= function(){updateLink(this.src);};
+					   );
 }
-*/
-//});
 
 //=======================================================
 
@@ -145,7 +113,7 @@ function isMediaDisplayed(){
 }
 
 function updateLink(arg) {
-	console.log("%c BEFORE updateLink  :" + currentLink,'background: #222; color: #ccaa99');
+	//console.log("%c BEFORE updateLink  :" + currentLink,'background: #222; color: #ccaa99');
 	currentLink = arg;
 	console.log("%c AFTER updateLink   :" + currentLink ,'background: #222; color: #bada99');
 }
@@ -167,9 +135,6 @@ function downloadThis(thelink) {
 		fadeImg(pointed_div);
 	}
 	else { fadeImg(pointed_obj); }
-
-	//togglePopup();
-	//document.getElementById('myPopup').innerHTML = filename;
 }
 
 
@@ -204,20 +169,17 @@ function onKeyPress(event){
 	}
 }
 
-document.addEventListener("mousemove",function(event){ //or "mousemove" or "mouseover" or mouseenter
+window.document.addEventListener("mousemove",function(event){ //or "mousemove" or "mouseover" or mouseenter
 	if( event.keyCode!=87 && !event.shiftKey ) {
 		//get_iframes_id();
 		monitorLinks();
 	}
-	//else if ( event.shiftKey ) {
-	//	getCoords(event);
-	//}
 });
 
 function monitorLinks(){
 	for(var i =0; i < img_links.length; i++){
 		img_links[i].onmouseenter = function(){
-			console.log("img_links[" + i + "]: " + img_links[i] + " with: " + this.src);
+			console.log("monitorLinks(): img_links[" + i + "]: updateLink with: " + this.src);
 			updateLink(this.src);
 			pointed_obj = this;
 		};
@@ -269,139 +231,3 @@ function fadeImg(img){
 	console.log("fading: " + img);
 	img.style.opacity = "0.4";
 }
-
-
-
-/*function DOM_ContentReady () {
-	console.log ("==> 2nd part of script run.", new Date() );
-}*/
-
-/* /===================================================
-   // BROKEN POPUP
-
-function DOM_ContentReady () {
-	console.log ("==> 2nd part of script run.", new Date() );
-	//$("head").append(' <style> \
-	GM_addStyle( '.popup {\
-position: fixed;\
-display: inline-block;\
-cursor: pointer;\
--webkit-user-select: none;\
--moz-user-select: none;\
--ms-user-select: none;\
-user-select: none;\
-}\
-\
-.popup .popuptext {\
-visibility: hidden;\
-width: 160px;\
-background-color: #ffffff;\
-color: #ff0000;\
-text-align: center;\
-border-radius: 6px;\
-padding: 8px 0;\
-position: fixed;\
-z-index: 1;\
-bottom: 10%;\
-left: 50%;\
-margin-left: -80px;\
-}\
-\
-.popup .popuptext::after {\
-content: "after-test";\
-position: fixed;\
-margin-left: -5px;\
-border-width: 5px;\
-border-style: solid;\
-border-color: #555 transparent transparent transparent;\
-}\
-\
-.popup .show {\
-visibility: visible;\
--webkit-animation: fadeIn 1s;\
-animation: fadeIn 0.5s;\
-}\
-\
-@-webkit-keyframes fadeIn {\
-from {opacity: 0;}\
-to {opacity: 1;}\
-}\
-\
-@keyframes fadeIn {\
-from {opacity: 0;}\
-to {opacity:1 ;}\
-}\
-' );
-	addGlobalStyle('.popup .popuptext { position: fixed; }');
-
-	$("body").append('<span class="popuptext" id="myPopup">TESQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQT</span>');
-	updateToolTipsStart();
-}
-
-var tooltips = document.querySelectorAll('.popuptext');
-//var x_coord, ycoord;
-var mousePosition = {x:0, y:0};
-
-function updateToolTips(){
-	tooltips = document.querySelectorAll('.popuptext');
-	for (i = 0; i < tooltips.length; i++){
-		console.log("tooltips:" + tooltips[i].id + " / " + tooltips.length);
-	}
-}
-
-
-function togglePopup() {
-	console.log("togglePopup()");
-	updateToolTipCoords();
-	var popup = document.getElementById("myPopup");
-	//popup.classList.toggle("show");
-	//setTimeout(function(){
-	//	popup.classList.toggle("show");
-	//}, 3000);
-}
-
-function getCoords(mouseMoveEvent) {
-	//x_coord = event.clientX + 'px';
-	//y_coord = event.clientY + 'px';
-	mousePosition.x = mouseMoveEvent.clientX + 'px';
-	mousePosition.y = mouseMoveEvent.clientY + 'px';
-}
-
-function updateToolTipCoords(){
-	//jQuery needed here
-	$("#myPopup").css('position', "fixed");
-	$("#myPopup").css('top', mousePosition.y);
-	$("#myPopup").css('left', mousePosition.x);
-	console.log("getCoords(): " + mousePosition.x + ", " + mousePosition.x);
-	for (var i = 0; i < tooltips.length; i++) {
-		tooltips[i].style.position = 'fixed';
-		tooltips[i].style.top = mousePosition.y;
-		tooltips[i].style.left = mousePosition.x;
-	}
-	//document.querySelector('.popup').style.top = y_coord +'px';
-	//document.querySelector('.popup').style.left = x_coord +'px';
-}
-
-function updateToolTipsStart(){
-	window.onmousemove = function updateTooltipPos(e){
-		var x = (e.clientX) + 'px',
-			y = (e.clientY) + 'px';
-		for (var i = 0; i < tooltips.length; i++) {
-			//console.log("tooltips:" + tooltips[i].id + " / " + tooltips.length);
-			tooltips[i].style.top = y;
-			tooltips[i].style.left = x;
-			console.log("update with:" + x + " " + y );
-		}
-	};
-}
-
-function addGlobalStyle(css) {
-	var head, style;
-	head = document.getElementsByTagName('head')[0];
-	if (!head) { return; }
-	style = document.createElement('style');
-	style.type = 'text/css';
-	style.innerHTML = css;
-	head.appendChild(style);
-}
-*/
