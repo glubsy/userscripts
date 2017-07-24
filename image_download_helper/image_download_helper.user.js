@@ -5,7 +5,7 @@
 // @description  add keyboard shortcuts to open and download image files quicker
 // @author       glubsy
 // @license      GPLv2
-// @compatible   chrome Chrome_46.0.2490.86 + TamperMonkey + 脚本_1.3 测试通过
+// @compatible   chrome Chrome_59.0.3071.109  + TamperMonkey
 // @match        *
 // @include      /^https?:\/\/.*tumblr.*/
 // @include      /^https?:\/\/.*imgur.*/
