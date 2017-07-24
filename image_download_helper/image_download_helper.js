@@ -26,7 +26,7 @@ var sizes = [ '_raw.', '_1280.' ];
 var new_url;
 
 function checkSize(index, url) {
-	if (url.indexOf("NOLINK!") > - 1) { new_url = url; return; }
+	if (url.indexOf("NOLINK!") > -1) { new_url = url; return; }
 	if (url.indexOf("tumblr") > -1) {
 		if(url.indexOf("avatar") > -1) { new_url = url ; return; }
 		if (index >= sizes.length) return;
@@ -45,6 +45,8 @@ function checkSize(index, url) {
 	}
 	else if (url.indexOf("imgur.com") > -1) {
 		new_url = url.replace(/(https?:\/\/.*)&t.*/, '$1');
+		new_url = new_url.replace(/(https?:\/\/.*)g(\..*)/, '$1' + '$2' );
+		console.log("imgur new link: " + new_url);
 	}
 	else { new_url = url; return; }
 }
@@ -61,9 +63,12 @@ $(window).mouseenter(function(e) {
 
 //=====================================================
 
+var modkey_pressed = false, pointed_obj, pointed_div;
+
 var links = document.getElementsByTagName('img'),
 	//linkDisplay = document.getElementById('currentLink'),
-	currentLink = "NOLINK!";
+	currentLink = "NOLINK!",
+	divs = document.getElementsByTagName('div');
 
 /*
 for(var i =0; i < links.length; i++){
@@ -93,12 +98,14 @@ function downloadThis(currentLink) {
 	var filename = new_url.substring(new_url.lastIndexOf('/')+1);
 	//GM_download({url: new_url, name: filename, saveAs: true});
 	//===========================================================*/
-	fadeImg(pointed_obj);
+	if ( window.location.href.substring("imgur") > -1) {
+		fadeImg(pointed_div);
+	}
+	else { fadeImg(pointed_obj); }
 }
 
 
 
-var modkey_pressed = false, pointed_obj;
 
 document.addEventListener("keydown", function(event){
 	if( event.keyCode==87 && event.shiftKey) {
@@ -132,12 +139,18 @@ document.addEventListener("mousemove",function(event){ //or "mousemove" or "mous
 				pointed_obj = this;
 			};
 		}
+		for(var j =0; i < divs.length; i++){
+			divs[i].onmouseenter = function(){
+				pointed_div = this;
+			};
+		}
 	}
 });
 
 //====================================================
 
 function fadeImg(img){
+	console.log("fading: " + img);
 	img.style.opacity = "0.4";
 }
 
