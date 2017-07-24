@@ -20,7 +20,7 @@
 //  Update size of to-be-downloaded-file to best size available from server
 //==================================================*/
 
-document.addEventListener ("DOMContentLoaded", DOM_ContentReady);
+//document.addEventListener ("DOMContentLoaded", DOM_ContentReady);
 
 var sizes = [ '_raw.', '_1280.' ];
 var new_url;
@@ -93,20 +93,17 @@ function downloadThis(currentLink) {
 	var filename = new_url.substring(new_url.lastIndexOf('/')+1);
 	//GM_download({url: new_url, name: filename, saveAs: true});
 	//===========================================================*/
-	togglePopup();
-	//$('#popup').html(filename);
-	document.getElementById('myPopup').innerHTML = filename;
+	fadeImg(pointed_obj);
 }
 
 
 
-var modkey_pressed = false;
+var modkey_pressed = false, pointed_obj;
 
 document.addEventListener("keydown", function(event){
 	if( event.keyCode==87 && event.shiftKey) {
 		modkey_pressed = true;
 		downloadThis(currentLink);
-		updateToolTipStart();
 	}
 	console.log("%c Key currentlink        :" + currentLink, 'background: #222; color: #bb55cc' );
 });
@@ -132,6 +129,7 @@ document.addEventListener("mousemove",function(event){ //or "mousemove" or "mous
 		for(var i =0; i < links.length; i++){
 			links[i].onmouseenter = function(){
 				updateLink(this.src);
+				pointed_obj = this;
 			};
 		}
 	}
@@ -139,105 +137,9 @@ document.addEventListener("mousemove",function(event){ //or "mousemove" or "mous
 
 //====================================================
 
+function fadeImg(img){
+	img.style.opacity = "0.4";
+}
+
 function DOM_ContentReady () {
-	console.log ("==> 2nd part of script run.", new Date() );
-	//$("head").append(' <style> \
-	GM_addStyle( '.popup {\
-position: relative;\
-display: inline-block;\
-cursor: pointer;\
--webkit-user-select: none;\
--moz-user-select: none;\
--ms-user-select: none;\
-user-select: none;\
-}\
-\
-.popup .popuptext {\
-visibility: hidden;\
-width: 160px;\
-background-color: #ffffff;\
-color: #ff0000;\
-text-align: center;\
-border-radius: 6px;\
-padding: 8px 0;\
-position: absolute;\
-z-index: 1;\
-bottom: 125%;\
-left: 50%;\
-margin-left: -80px;\
-}\
-\
-.popup .popuptext::after {\
-content: "";\
-position: absolute;\
-top: 100%;\
-left: 50%;\
-margin-left: -5px;\
-border-width: 5px;\
-border-style: solid;\
-border-color: #555 transparent transparent transparent;\
-}\
-\
-.popup .show {\
-visibility: visible;\
--webkit-animation: fadeIn 1s;\
-animation: fadeIn 0.5s;\
-}\
-\
-@-webkit-keyframes fadeIn {\
-from {opacity: 0;}\
-to {opacity: 1;}\
-}\
-\
-@keyframes fadeIn {\
-from {opacity: 0;}\
-to {opacity:1 ;}\
-}\
-' );
-	$("body").append('<span class="popuptext" id="myPopup">TESQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQT</span>');
-	updateTooltips();
-}
-
-var tooltips = document.querySelectorAll('.popuptext');
-
-function updateTooltips(){
-	tooltips = document.querySelectorAll('.popuptext');
-	for (i = 0; i < tooltips.length; i++){
-		console.log("tooltips:" + tooltips[i].id + " / " + tooltips.length);
-	}
-}
-
-
-function togglePopup() {
-	getCoords(event);
-	var popup = document.getElementById("myPopup");
-	popup.classList.toggle("show");
-	setTimeout(function(){
-		popup.classList.toggle("show");
-	}, 3000);
-}
-
-function getCoords(event) {
-	var x_coord = event.clientX + "px";
-	var y_coord = event.clientY + "px";
-	//$("#popup").css('top', x_coord +'px');
-	//$("#popup").css('left', y_coord +'px');
-	//document.querySelector('.popuptext').style.position = 'absolute';
-	document.querySelector('.popuptext').style.top = y_coord +'px';
-	document.querySelector('.popuptext').style.left = x_coord +'px';
-	//document.querySelector('.popup').style.top = y_coord +'px';
-	//document.querySelector('.popup').style.left = x_coord +'px';
-}
-
-function updateToolTipStart(){
-	window.onmousemove = function updateTooltipPos(e){
-		var x = (e.clientX) + 'px',
-			y = (e.clientY) + 'px';
-		for (var i = 0; i < tooltips.length; i++) {
-			//console.log("tooltips:" + tooltips[i].id + " / " + tooltips.length);
-			tooltips[i].style.top = y;
-			tooltips[i].style.left = x;
-			console.log("update with:" + x + " " + y );
-		}
-	};
 }
