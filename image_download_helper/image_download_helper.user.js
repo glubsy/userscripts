@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name       Custom keyboard shortcuts
-// @namespace  test
+// @name       Image download helper
+// @namespace  https://github.com/glubsy/userscripts
 // @version    0.05
-// @description  add keyboard + mouse shortcut to open images in new tab
+// @description  add keyboard shortcuts to open and download image files quicker
 // @match      *
 // @include *
 // @copyright  Fuck copyrights
