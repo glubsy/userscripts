@@ -1,21 +1,25 @@
 // ==UserScript==
-// @name       Image download helper
-// @namespace  https://github.com/glubsy/userscripts
-// @version    0.05
+// @name         Image download helper
+// @namespace    https://github.com/glubsy/userscripts
+// @version      0.05
 // @description  add keyboard shortcuts to open and download image files quicker
-// @match      *
-// @include /^https?:\/\/.*tumblr.*/
-// @include /^https?:\/\/.*imgur.*/
-// @copyright  Fuck copyrights
-//// @require  	   https://code.jquery.com/jquery-1.11.2.min.js
-// @require     https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
-// @grant    GM_openInTab
-// @grant    GM_download
-// @grant    GM_addStyle
-// @run-at      document-idle
+// @author       glubsy
+// @license      GPLv2
+// @compatible   chrome Chrome_46.0.2490.86 + TamperMonkey + 脚本_1.3 测试通过
+// @match        *
+// @include      /^https?:\/\/.*tumblr.*/
+// @include      /^https?:\/\/.*imgur.*/
+// @copyright    Fuck copyrights
+//// @require  	 https://code.jquery.com/jquery-1.11.2.min.js
+// @require      https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
+// @grant        GM_openInTab
+// @grant        GM_download
+//// @grant       GM_addStyle
+// @run-at       document-idle
 //// @noframes
 /*jshint multistr: true */
 // ==/UserScript==
+
 //TODO: -maybe implement a better save-as system? ie https://gist.github.com/derjanb/4431f674124ef1b11e30
 //      -clean up
 
@@ -37,7 +41,7 @@ function gatherImages(){
 		if (myimages[i] === undefined) { continue; }
 		if (myimages[i].src.indexOf("avatar") > 0) { continue; }
 		myimages[i].onmouseenter = function (){ updateLink(this.src); pointed_obj = this; };
-		console.log("gatherImages: " + myimages[i].src);
+		//console.log("gatherImages: " + myimages[i].src);
 	}
 }
 
@@ -72,7 +76,7 @@ function get_iframes_id(){
 		var src = $(this).attr("src"); //photoset_number
 		if ( src === undefined ) { return; }
 		var iframe_numb = "photoset_iframe_" + src.replace(/\/post\/(\d+)\/photoset_iframe.*/, '$1');
-		console.log("get_iframes_id() found iframe:" + iframe_numb);
+		//console.log("get_iframes_id() found iframe:" + iframe_numb);
 
 		var iframe = document.getElementById(iframe_numb);
 		var innerDoc = iframe.contentDocument || iframe.contentWindow.document; //TODO: fix the error on cross-origin iframes
@@ -118,7 +122,7 @@ function isMediaDisplayed(){
 function updateLink(arg) {
 	//console.log("%c BEFORE updateLink  :" + currentLink,'background: #222; color: #ccaa99');
 	currentLink = arg;
-	console.log("%c AFTER updateLink   :" + currentLink ,'background: #222; color: #bada99');
+	//console.log("%c AFTER updateLink   :" + currentLink ,'background: #222; color: #bada99');
 }
 
 function downloadThis(thelink) {
@@ -126,9 +130,9 @@ function downloadThis(thelink) {
 		return;
 	}
 	//GM_openInTab( currentLink );
-	console.log("%c Downloading currentlink :" + currentLink, 'background: #222; color: #bada55' );
+	//console.log("%c Downloading currentlink :" + currentLink, 'background: #222; color: #bada55' );
 	checkSize(0, thelink);
-	console.log("%c new_url                 :" + new_url, 'background: #222; color: #f46b42');
+	//console.log("%c new_url                 :" + new_url, 'background: #222; color: #f46b42');
 	if ( new_url.indexOf("NOLINK!") > -1) { return; }
 	//=========================================================
 	var filename = new_url.substring(new_url.lastIndexOf('/')+1);
@@ -141,7 +145,7 @@ function downloadThis(thelink) {
 }
 
 function openThisInTab(thelink) { //requires Tumblr Image Size script for best results
-	console.log("openThisInTab(): " + thelink);
+	//console.log("openThisInTab(): " + thelink);
 	if( !modkey_pressed || thelink === undefined ) { return; }
 	GM_openInTab( thelink );
 }
@@ -159,7 +163,7 @@ document.addEventListener("keydown", function(event){
 		var filename = currentLink.substring(currentLink.lastIndexOf('/')+1);
 		GM_download({url: currentLink, name: filename, saveAs: true});
 	}
-	console.log("%c Key currentLink        :" + currentLink, 'background: #222; color: #bb55cc' );
+	//console.log("%c Key currentLink        :" + currentLink, 'background: #222; color: #bb55cc' );
 });
 
 document.addEventListener("keyup", function(event){
@@ -191,7 +195,7 @@ window.document.addEventListener("mousemove",function(event){ //or "mousemove" o
 function monitorLinks(){
 	for(var i =0; i < img_links.length; i++){
 		img_links[i].onmouseenter = function(){
-			console.log("monitorLinks(): img_links[" + i + "]: updateLink with: " + this.src);
+			//console.log("monitorLinks(): img_links[" + i + "]: updateLink with: " + this.src);
 			updateLink(this.src);
 			pointed_obj = this;
 		};
@@ -230,7 +234,7 @@ function checkSize(index, url) {
 	else if (url.indexOf("imgur.com") > -1) {
 		new_url = url.replace(/(https?:\/\/.*)&t.*/, '$1');  //remove imgur junk
 		new_url = new_url.replace(/(https?:\/\/.*)g(\..*)/, '$1' + '$2' ); //don't fetch thumbnail
-		console.log("imgur new link: " + new_url);
+		//console.log("imgur new link: " + new_url);
 	}
 	else { new_url = url; return; }
 }
@@ -240,6 +244,6 @@ function checkSize(index, url) {
 //====================================================
 
 function fadeImg(img){
-	console.log("fading: " + img);
+	//console.log("fadeImg(): " + img);
 	img.style.opacity = "0.4";
 }
