@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       Custom keyboard shortcuts
 // @namespace  test
-// @version    0.03
+// @version    0.05
 // @description  add keyboard + mouse shortcut to open images in new tab
 // @match      *
 // @include *
@@ -137,14 +137,22 @@ function downloadThis(thelink) {
 	else { fadeImg(pointed_obj); }
 }
 
-
+function openThisInTab(thelink) { //requires Tumblr Image Size script for best results
+	console.log("openThisInTab(): " + thelink);
+	if( !modkey_pressed || thelink === undefined ) { return; }
+	GM_openInTab( thelink );
+}
 
 document.addEventListener("keydown", function(event){
 	if( event.keyCode==87 && event.shiftKey && !isMediaDisplayed()) {
 		modkey_pressed = true;
 		downloadThis(currentLink);
 	}
-	else if (isMediaDisplayed() && currentLink !== undefined ){  //Download with only one key press
+	else if (!isMediaDisplayed() && event.altKey){
+		modkey_pressed = true;
+		openThisInTab(currentLink);
+	}
+	else if (isMediaDisplayed() && currentLink !== undefined && event.shiftKey ){  //Download with only one key press
 		var filename = currentLink.substring(currentLink.lastIndexOf('/')+1);
 		GM_download({url: currentLink, name: filename, saveAs: true});
 	}
@@ -157,6 +165,7 @@ document.addEventListener("keyup", function(event){
 	//}
 	if (event.keycode!==0) {
 		modkey_pressed = false;
+		currentLink = undefined;
 		//console.log("ctrl_pressed is:" + modkey_pressed);
 	}
 });
