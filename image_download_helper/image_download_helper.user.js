@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Image download helper
 // @namespace    https://github.com/glubsy/userscripts
-// @version      0.05
+// @version      0.07
 // @description  add keyboard shortcuts to open and download image files quicker
 // @author       glubsy
 // @license      GPLv2
@@ -31,7 +31,8 @@ document.addEventListener ("DOMContentLoaded", DOM_ContentReady);
 //=====================================================
 
 var modkey_pressed = false, pointed_obj, pointed_div;
-var img_links, img_links_iframe, class_links, currentLink, divs;
+var img_links, img_links_iframe, class_links, currentLink, divs_links;
+var photo_cover_class_links, photo_cover_ishref = "false";
 
 $(document).ready(get_iframes_id());
 
@@ -43,14 +44,36 @@ function gatherImages(){
 		if (myimages[i] === undefined) { continue; }
 		if (myimages[i].src.indexOf("avatar") > 0) { continue; }
 		myimages[i].onmouseenter = function (){ updateLink(this.src); pointed_obj = this; };
-		//console.log("gatherImages: " + myimages[i].src);
+		myimages[i].onmouseout = function (){ updateLink(undefined); pointed_obj = undefined; };
+		console.log("gatherImages: " + myimages[i].src);
 	}
 }
 
 
 img_links = document.getElementsByTagName('img');
 class_links = document.getElementsByClassName('photoset_photo');
+a_links = document.getElementsByTagName('a');
+divs_links = document.getElementsByTagName('div');
+photo_cover_class_links = document.getElementsByClassName('photo-cover'); //a tumblr theme's specific case
 
+
+function getPhotoCoverLinks(){
+	for(let i =0; i < photo_cover_class_links.length; i++){
+		if (photo_cover_ishref == "false" ) { return; } //if a link to an external imgur is not there, skip it, don't add the extra original image above
+		console.log("photo_cover_class_links[" + i + "] :" + photo_cover_class_links[i].style.backgroundImage); //getting link from the css style, not ideal
+
+		let myimg = photo_cover_class_links[i].style.backgroundImage;
+
+		myimg = myimg.substring(4, myimg.length-1);
+		myimg = myimg.replace(/(.*)(?=_)(_\d+)(.*)/, '$1' + '_500' + '$3');
+		let myimghref = '<img src=' + myimg + '>'; //inserting extra original tumblr thumbnail above actual post
+
+		photo_cover_class_links[i].innerHTML = photo_cover_class_links[i].innerHTML + myimghref;
+		photo_cover_class_links[i].outerHTML+=myimghref; // add it to the div
+
+		console.log("innerHTML on : " + photo_cover_class_links[i] + "with :" + myimghref);
+	}
+}
 /*/============================================================
 // Just testing this, in case is becomes useful eventually:
 var IMGmatches = [], IMGelems = document.getElementsByTagName("img"),
@@ -66,7 +89,6 @@ for( let j=0; j<m; j++) {
 
 //==========================================================*/
 
-divs = document.getElementsByTagName('div');
 
 function get_iframes_id(){
 	//console.log("get_iframes_id()");
@@ -97,7 +119,7 @@ function get_iframes_id(){
 		//END TESTING*/
 
 		iframe.addEventListener("load", function() {
-			//console.log("get_iframes_id(): LOADED iFRAME!");
+			console.log("get_iframes_id(): LOADED iFRAME!");
 			/*iframe.addEventListener("keydown", function(event){ //not needed apparently
 				if( event.keyCode==87 && event.shiftKey ) {
 					modkey_pressed = true;
@@ -107,10 +129,15 @@ function get_iframes_id(){
 			});*/
 
 			img_links_iframe = innerDoc.getElementsByTagName('img');  //	or img_links_iframe = innerDoc.links; ??
+			a_links_iframe = innerDoc.getElementsByTagName('a');
 			//console.log("get_iframes_id(): img_links_iframe: " + img_links_iframe.length);
 			for(let i =0; i < img_links_iframe.length; i++){
 				img_links_iframe[i].onmousemove = function (){ updateLink(this.src); pointed_obj = this; };
-				//console.log("get_iframes_id(): img_links_iframes[" + i + "]: " + img_links_iframe[i].src);
+				console.log("get_iframes_id(): img_links_iframes[" + i + "]: " + img_links_iframe[i].src);
+			}
+			for(let j =0; j < a_links_iframe.length; i++){
+				a_links_iframe[j].onmousemove = function (){ updateLink(this.href); pointed_obj = this; };
+				console.log("get_iframes_id(): a_links_iframes[" + j + "]: " + a_links_iframe[j].href);
 			}
 
 		},false);
@@ -123,7 +150,7 @@ function get_iframes_id(){
 function updateLink(arg) {
 	//console.log("%c BEFORE updateLink  :" + currentLink,'background: #222; color: #ccaa99');
 	currentLink = arg;
-	//console.log("%c AFTER updateLink   :" + currentLink ,'background: #222; color: #bada99');
+	console.log("%c AFTER updateLink   :" + currentLink ,'background: #222; color: #bada99');
 }
 
 function downloadThis(thelink) {
@@ -189,20 +216,44 @@ function onKeyPress(event){
 document.addEventListener("mousemove",function(event){ //or "mousemove" or "mouseover" or mouseenter
 	if( event.keyCode!=87 && !event.shiftKey ) {
 		//get_iframes_id();
-		monitorLinks();
+		//monitorLinks();
 	}
 });
 
+checkForClickThroughCase();
+
+getPhotoCoverLinks();
+monitorLinks();
+
+function checkForClickThroughCase(){
+	for(let i =0; i < a_links.length; i++){
+		if (a_links[i].className == 'click-through-picture') {
+			/*console.log("click-through detected for :" + a_links[i]);*/
+			if (a_links[i].href.indexOf("imgur") > 0) {
+				photo_cover_ishref = "true";
+			}
+		}
+	}
+}
+
 function monitorLinks(){
-	for(var i =0; i < img_links.length; i++){
+	for(let i =0; i < img_links.length; i++){
 		img_links[i].onmouseenter = function(){
 			//console.log("monitorLinks(): img_links[" + i + "]: updateLink with: " + this.src);
 			updateLink(this.src);
 			pointed_obj = this;
 		};
 	}
-	for(var j =0; i < divs.length; i++){
-		divs[i].onmouseenter = function(){
+	for(let i =0; i < divs_links.length; i++){
+		divs_links[i].onmouseenter = function(){
+			//console.log("monitorLinks(): divs_links[" + i + "]: updateLink with: " + this.src);
+			pointed_div = this;
+		};
+	}
+	for(let i =0; i < a_links.length; i++){
+		a_links[i].onmouseenter = function(){
+			//console.log("monitorLinks(): a_links[" + i + "]: updateLink with: " + this.href);
+			updateLink(this.href);
 			pointed_div = this;
 		};
 	}
