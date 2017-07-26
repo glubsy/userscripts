@@ -7,8 +7,10 @@
 // @license      GPLv2
 // @compatible   chrome Chrome_59.0.3071.109  + TamperMonkey
 // @match        *
-// @include      /^https?:\/\/.*tumblr.*/
-// @include      /^https?:\/\/.*imgur.*/
+// @include      /^https?://.*tumblr.*/
+// @include      /^https?://.*imgur.*/
+// @include      /^https?://.*mixtape.*/
+// @include      /^https?://.*uploadir.*/
 // @copyright    Fuck copyrights
 //// @require  	 https://code.jquery.com/jquery-1.11.2.min.js
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
@@ -17,7 +19,8 @@
 //// @grant       GM_addStyle
 // @run-at       document-idle
 //// @noframes
-/*jshint multistr: true */
+//jshint multistr: true
+//esversion: 6
 // ==/UserScript==
 
 //TODO: -maybe implement a better save-as system? ie https://gist.github.com/derjanb/4431f674124ef1b11e30
@@ -29,7 +32,6 @@ document.addEventListener ("DOMContentLoaded", DOM_ContentReady);
 
 var modkey_pressed = false, pointed_obj, pointed_div;
 var img_links, img_links_iframe, class_links, currentLink, divs;
-var extensions = ["jpg", "jpeg", "png", "gif", "mp4", "webm", "gifv", "tiff", "bmp"];
 
 $(document).ready(get_iframes_id());
 
@@ -66,10 +68,15 @@ for( let j=0; j<m; j++) {
 
 divs = document.getElementsByTagName('div');
 
-isMediaDisplayed();
-
 function get_iframes_id(){
 	//console.log("get_iframes_id()");
+
+	/*
+	var frames = window.frames;
+	for (let i = 0; i < frames.length; i++) {
+		console.log("frames.length: " + frames.length);
+		console.log("frames[" + i + "] :" + frames[i].class);
+	}*/
 
 	//$('iframe').each(function(){
 	$('.photoset').each(function(){  //.photoset works?
@@ -113,12 +120,6 @@ function get_iframes_id(){
 
 //=======================================================
 
-function isMediaDisplayed(){
-	let extension = window.location.pathname.replace(/.*\./, '').toLowerCase();
-	if (extensions.indexOf(extension) < 0) { return false; }
-	else { currentLink = window.location.href; return true; }
-}
-
 function updateLink(arg) {
 	//console.log("%c BEFORE updateLink  :" + currentLink,'background: #222; color: #ccaa99');
 	currentLink = arg;
@@ -148,22 +149,22 @@ function openThisInTab(thelink) { //requires Tumblr Image Size script for best r
 	//console.log("openThisInTab(): " + thelink);
 	if( !modkey_pressed || thelink === undefined ) { return; }
 	GM_openInTab( thelink );
+	if ( window.location.href.substring("imgur") > -1) {
+		fadeImg(pointed_div, 0.6);
+	}
+	else { fadeImg(pointed_obj, 0.6); }
 }
 
 document.addEventListener("keydown", function(event){
-	if( event.keyCode==87 && event.shiftKey && !isMediaDisplayed()) {
+	if( event.keyCode==87 && event.shiftKey) {
 		modkey_pressed = true;
 		downloadThis(currentLink);
 	}
-	else if (!isMediaDisplayed() && event.altKey){
+	else if (event.altKey){
 		modkey_pressed = true;
 		openThisInTab(currentLink);
 	}
-	else if (isMediaDisplayed() && currentLink !== undefined && event.shiftKey ){  //Download with only one key press
-		var filename = currentLink.substring(currentLink.lastIndexOf('/')+1);
-		GM_download({url: currentLink, name: filename, saveAs: true});
-	}
-	//console.log("%c Key currentLink        :" + currentLink, 'background: #222; color: #bb55cc' );
+	console.log("%c Key currentLink        :" + currentLink, 'background: #222; color: #bb55cc' );
 });
 
 document.addEventListener("keyup", function(event){
@@ -185,7 +186,7 @@ function onKeyPress(event){
 	}
 }
 
-window.document.addEventListener("mousemove",function(event){ //or "mousemove" or "mouseover" or mouseenter
+document.addEventListener("mousemove",function(event){ //or "mousemove" or "mouseover" or mouseenter
 	if( event.keyCode!=87 && !event.shiftKey ) {
 		//get_iframes_id();
 		monitorLinks();
@@ -243,7 +244,7 @@ function checkSize(index, url) {
 
 //====================================================
 
-function fadeImg(img){
+function fadeImg(img, f_Opacity = 0.4){
 	//console.log("fadeImg(): " + img);
-	img.style.opacity = "0.4";
+	img.style.opacity = f_Opacity;
 }
