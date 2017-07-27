@@ -60,7 +60,7 @@ photo_cover_class_links = document.getElementsByClassName('photo-cover'); //a tu
 function getPhotoCoverLinks(){
 	for(let i =0; i < photo_cover_class_links.length; i++){
 		if (photo_cover_ishref == "false" ) { return; } //if a link to an external imgur is not there, skip it, don't add the extra original image above
-		console.log("photo_cover_class_links[" + i + "] :" + photo_cover_class_links[i].style.backgroundImage); //getting link from the css style, not ideal
+		//console.log("photo_cover_class_links[" + i + "] :" + photo_cover_class_links[i].style.backgroundImage); //getting link from the css style, not ideal
 
 		let myimg = photo_cover_class_links[i].style.backgroundImage;
 
@@ -71,7 +71,7 @@ function getPhotoCoverLinks(){
 		photo_cover_class_links[i].innerHTML = photo_cover_class_links[i].innerHTML + myimghref;
 		photo_cover_class_links[i].outerHTML+=myimghref; // add it to the div
 
-		console.log("innerHTML on : " + photo_cover_class_links[i] + "with :" + myimghref);
+		//console.log("innerHTML on : " + photo_cover_class_links[i] + "with :" + myimghref);
 	}
 }
 /*/============================================================
@@ -229,7 +229,7 @@ function checkForClickThroughCase(){
 	for(let i =0; i < a_links.length; i++){
 		if (a_links[i].className == 'click-through-picture') {
 			/*console.log("click-through detected for :" + a_links[i]);*/
-			if (a_links[i].href.indexOf("imgur") > 0) {
+			if (a_links[i].href.indexOf("tumblr") < 0) {
 				photo_cover_ishref = "true";
 			}
 		}
