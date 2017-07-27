@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Image download helper
 // @namespace    https://github.com/glubsy/userscripts
-// @version      0.07
+// @version      0.08
 // @description  add keyboard shortcuts to open and download image files quicker
 // @author       glubsy
 // @license      GPLv2
@@ -175,11 +175,22 @@ function downloadThis(thelink) {
 function openThisInTab(thelink) { //requires Tumblr Image Size script for best results
 	//console.log("openThisInTab(): " + thelink);
 	if( !modkey_pressed || thelink === undefined ) { return; }
-	GM_openInTab( thelink );
-	if ( window.location.href.substring("imgur") > -1) {
+	let cleanedLink = cleanRedirectURL( thelink );
+	console.log("cleanedlink: " + cleanedLink);
+	GM_openInTab( cleanedLink );
+	if ( window.location.href.substring("imgur") > -1) { //fade div
 		fadeImg(pointed_div, 0.6);
 	}
 	else { fadeImg(pointed_obj, 0.6); }
+}
+
+function cleanRedirectURL(crapLink){ //clean stupid tumblr redirect analytics
+	crapLink = crapLink.replace(/(.*redirect.*)(http.*)&t=.*/, '$2');
+	return translateHTMLCodes(crapLink);
+}
+
+function translateHTMLCodes(mystring){
+	return mystring.replace(/&amp;/g, "&").replace(/&gt;/g, ">").replace(/&lt;/g, "<").replace(/&quot;/g, "\"").replace(/%3A/g, ":").replace(/%2F/g, "/");
 }
 
 document.addEventListener("keydown", function(event){
@@ -229,7 +240,7 @@ function checkForClickThroughCase(){
 	for(let i =0; i < a_links.length; i++){
 		if (a_links[i].className == 'click-through-picture') {
 			/*console.log("click-through detected for :" + a_links[i]);*/
-			if (a_links[i].href.indexOf("tumblr") < 0) {
+			if (a_links[i].href.indexOf("redirect") > 0 || a_links[i].href.indexOf("imgur") > 0 ) {
 				photo_cover_ishref = "true";
 			}
 		}
@@ -246,8 +257,9 @@ function monitorLinks(){
 	}
 	for(let i =0; i < divs_links.length; i++){
 		divs_links[i].onmouseenter = function(){
-			//console.log("monitorLinks(): divs_links[" + i + "]: updateLink with: " + this.src);
+			//console.log("monitorLinks(): divs_links[" + i + "]: updateLink with: " + this);
 			pointed_div = this;
+			pointed_obj = this;
 		};
 	}
 	for(let i =0; i < a_links.length; i++){
@@ -257,6 +269,12 @@ function monitorLinks(){
 			pointed_div = this;
 		};
 	}
+}
+
+
+function fadeImg(img, f_Opacity = 0.4){
+	//console.log("fadeImg(): " + img);
+	img.style.opacity = f_Opacity;
 }
 
 //====================================================================
@@ -291,11 +309,4 @@ function checkSize(index, url) {
 	else { new_url = url; return; }
 }
 
-
-
 //====================================================
-
-function fadeImg(img, f_Opacity = 0.4){
-	//console.log("fadeImg(): " + img);
-	img.style.opacity = f_Opacity;
-}
