@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Image download helper
 // @namespace    https://github.com/glubsy/userscripts
-// @version      0.08
+// @version      0.09
 // @description  add keyboard shortcuts to open and download image files quicker
 // @author       glubsy
 // @license      GPLv2
@@ -57,23 +57,6 @@ divs_links = document.getElementsByTagName('div');
 photo_cover_class_links = document.getElementsByClassName('photo-cover'); //a tumblr theme's specific case
 
 
-function getPhotoCoverLinks(){
-	for(let i =0; i < photo_cover_class_links.length; i++){
-		if (photo_cover_ishref == "false" ) { return; } //if a link to an external imgur is not there, skip it, don't add the extra original image above
-		//console.log("photo_cover_class_links[" + i + "] :" + photo_cover_class_links[i].style.backgroundImage); //getting link from the css style, not ideal
-
-		let myimg = photo_cover_class_links[i].style.backgroundImage;
-
-		myimg = myimg.substring(4, myimg.length-1);
-		myimg = myimg.replace(/(.*)(?=_)(_\d+)(.*)/, '$1' + '_500' + '$3');
-		let myimghref = '<img src=' + myimg + '>'; //inserting extra original tumblr thumbnail above actual post
-
-		photo_cover_class_links[i].innerHTML = photo_cover_class_links[i].innerHTML + myimghref;
-		photo_cover_class_links[i].outerHTML+=myimghref; // add it to the div
-
-		//console.log("innerHTML on : " + photo_cover_class_links[i] + "with :" + myimghref);
-	}
-}
 /*/============================================================
 // Just testing this, in case is becomes useful eventually:
 var IMGmatches = [], IMGelems = document.getElementsByTagName("img"),
@@ -232,15 +215,33 @@ document.addEventListener("mousemove",function(event){ //or "mousemove" or "mous
 });
 
 checkForClickThroughCase();
-
 getPhotoCoverLinks();
 monitorLinks();
+
+
+function getPhotoCoverLinks(){
+	for(let i =0; i < photo_cover_class_links.length; i++){
+		if (photo_cover_ishref == "false" ) { return; } //if a link to an external imgur is not there, skip it, don't add the extra original image above
+		//console.log("photo_cover_class_links[" + i + "] :" + photo_cover_class_links[i].style.backgroundImage); //getting link from the css style, not ideal
+
+		let myimg = photo_cover_class_links[i].style.backgroundImage;
+
+		myimg = myimg.substring(4, myimg.length-1);
+		myimg = myimg.replace(/(.*)(?=_)(_\d+)(.*)/, '$1' + '_500' + '$3');
+		let myimghref = '<img src=' + myimg + '>'; //inserting extra original tumblr thumbnail above actual post
+
+		photo_cover_class_links[i].innerHTML = photo_cover_class_links[i].innerHTML + myimghref;
+		photo_cover_class_links[i].outerHTML+=myimghref; // add it to the div
+
+		//console.log("innerHTML on : " + photo_cover_class_links[i] + "with :" + myimghref);
+	}
+}
 
 function checkForClickThroughCase(){
 	for(let i =0; i < a_links.length; i++){
 		if (a_links[i].className == 'click-through-picture') {
 			/*console.log("click-through detected for :" + a_links[i]);*/
-			if (a_links[i].href.indexOf("redirect") > 0 || a_links[i].href.indexOf("imgur") > 0 ) {
+			if (a_links[i].href.indexOf("redirect") > 0 || a_links[i].href.indexOf("tumblr") < 0 ) {
 				photo_cover_ishref = "true";
 			}
 		}
