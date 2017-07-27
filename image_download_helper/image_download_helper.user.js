@@ -26,6 +26,8 @@
 //TODO: -maybe implement a better save-as system? ie https://gist.github.com/derjanb/4431f674124ef1b11e30
 //      -clean up
 
+if (isMediaDisplayed()) { /*console.log("A media file being displayed, stopping user script.");*/ return; }
+
 document.addEventListener ("DOMContentLoaded", DOM_ContentReady);
 
 //=====================================================
@@ -33,6 +35,7 @@ document.addEventListener ("DOMContentLoaded", DOM_ContentReady);
 var modkey_pressed = false, pointed_obj, pointed_div;
 var img_links, img_links_iframe, class_links, currentLink, divs_links;
 var photo_cover_class_links, photo_cover_ishref = "false";
+//var extensions = ["jpg", "jpeg", "png", "gif", "mp4", "webm", "gifv", "tiff", "bmp"];
 
 $(document).ready(get_iframes_id());
 
@@ -213,6 +216,16 @@ document.addEventListener("mousemove",function(event){ //or "mousemove" or "mous
 		//monitorLinks();
 	}
 });
+
+function isMediaDisplayed(){
+	let htmlClass = document.getElementsByTagName('html');
+	for (let i=0; i < htmlClass.length; i++)
+		if (htmlClass[i].className == "img"){ //TODO: check for other media types
+			return true;
+		}
+	return false;
+}
+
 
 checkForClickThroughCase();
 getPhotoCoverLinks();
