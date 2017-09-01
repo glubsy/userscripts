@@ -6,10 +6,10 @@
 // @homepage      https://greasyfork.org/scripts/
 // @include       *tumblr.com/archive*
 // @run-at        document-start
-// @version       0.01
+// @version       0.02
 // ==/UserScript==
 
-var css = "body,html { background: #212121; }";
+var css = "body,html { background: #212121; } h2 { color: #d01010; }";
 
 var node = document.createElement("style");
 node.type = "text/css";
