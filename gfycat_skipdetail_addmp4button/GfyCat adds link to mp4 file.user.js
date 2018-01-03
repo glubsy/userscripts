@@ -2,7 +2,7 @@
 // @name         GfyCat adds link to mp4 file
 // @namespace    gfycataddmp4link
 // @description  Adds a link to the mp4 file of gfycat webm, redirects from detail page to actual file page
-// @version      0.6
+// @version      0.7
 // @author       https://greasyfork.org/scripts/32493-gfycat-redirect-to-webm-video-file forked by glub
 // @updateURL    https://greasyfork.org/en/scripts/34139-gfycat-adds-link-to-mp4-file
 // @match        http://gfycat.com/*
@@ -53,8 +53,10 @@ else
 		}
 	} else {
 		// gifycat.com/id
-		var webm = document.getElementById('webmSource').src;
-		var mp4 = document.getElementById('mp4Source').src;
+		//var webm = document.getElementById('webmSource').src;
+		var webm = superAwesomeGlobalGfyJSON.webmUrl;
+		//var mp4 = document.getElementById('mp4Source').src;
+		var mp4 = superAwesomeGlobalGfyJSON.mp4Url;
 		//var caption = document.getElementsByTagName('figcaption')[0].innerHTML;
 		var source_url = superAwesomeGlobalGfyJSON.url;
 		if (source_url === null){
