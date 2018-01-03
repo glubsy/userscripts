@@ -2,7 +2,7 @@
 // @name         GfyCat adds link to mp4 file
 // @namespace    gfycataddmp4link
 // @description  Adds a link to the mp4 file of gfycat webm, redirects from detail page to actual file page
-// @version      0.5
+// @version      0.6
 // @author       https://greasyfork.org/scripts/32493-gfycat-redirect-to-webm-video-file forked by glub
 // @updateURL    https://greasyfork.org/en/scripts/34139-gfycat-adds-link-to-mp4-file
 // @match        http://gfycat.com/*
@@ -55,12 +55,15 @@ else
 		// gifycat.com/id
 		var webm = document.getElementById('webmSource').src;
 		var mp4 = document.getElementById('mp4Source').src;
-		var caption = document.getElementsByTagName('figcaption')[0].innerHTML;
-		if (caption.indexOf('http') !== -1){ //looking for a valid http address in figcaption
-			//console.log("figcaption: ", caption);
-			var sourceurl = caption.substr(caption.indexOf('http')); //setting whatever is http in figcaption as sourceurl
-			//console.log("sourceurl:", sourceurl);
-			add_detail_element(sourceurl);
+		//var caption = document.getElementsByTagName('figcaption')[0].innerHTML;
+		var source_url = superAwesomeGlobalGfyJSON.url;
+		if (source_url === null){
+			add_detail_element(source_url);
+		}
+		else if (source_url.indexOf('http') !== -1){ //found http, valid url
+			//console.log("source_url: ", source_url);
+			//var sourceurl = source_url.substr(source_url.indexOf('http')); //setting whatever is http in figcaption as sourceurl
+			add_detail_element(source_url);
 		}
 		else{
 			add_detail_element(null);
