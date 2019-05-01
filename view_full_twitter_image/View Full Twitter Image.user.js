@@ -95,7 +95,7 @@ function download(filename) {
 	else {
 		if (location.href.includes(":large")) {
 			console.log("(Full Image) Will replace large with original.");
-			location.href.replace(":large", ":orig");
+			window.location.assign(location.href.replace(":large", ":orig"));
 		} else if (!location.href.includes(":orig")) {
 			console.log("(Full Image) Will change legacy API URL to original.");
 			location.href += ":orig";
