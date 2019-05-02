@@ -14,6 +14,8 @@ If you feel that you can improve the script, feel free to do so. The code is awf
 A fork of https://greasyfork.org/scripts/9014-tumblr-image-size
 Displays the actual best quality version ("raw") of a displayed pictures (after it's opened in a tab) instead of the 1280p version.
 
-
 ## tumblr_archive_background_change.user.js ##
 Change the white background color to dark.
+
+## gfycat_skipdetail_addmp4button ##
+Adds a link to the mp4 file for gfycrap pages.
