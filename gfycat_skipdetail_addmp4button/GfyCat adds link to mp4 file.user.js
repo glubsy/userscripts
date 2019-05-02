@@ -56,7 +56,6 @@ else
 				mp4link = children[i].src;
 			}
 		}
-		console.log("video player was there. webm:", webmlink, " mp4:", mp4link);
 	}
 	else {
 		// we don't have a videoplayer (yet?)
