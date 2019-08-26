@@ -2,7 +2,7 @@
 // @name         GfyCat adds link to mp4 file
 // @namespace    gfycataddmp4link
 // @description  Adds a link to the mp4 file of gfycat webm, redirects from detail page to actual file page
-// @version      0.9
+// @version      0.10
 // @author       https://greasyfork.org/scripts/32493-gfycat-redirect-to-webm-video-file forked by glub
 // @updateURL    https://greasyfork.org/en/scripts/34139-gfycat-adds-link-to-mp4-file
 // @match        http://gfycat.com/*
@@ -35,7 +35,8 @@ function __delay__(timer) {
 	return new Promise(resolve => {
         timer = timer || 3000;
         setTimeout(function () {
-			parentnode = document.getElementsByClassName('block-3')[1].children[0];
+			parentnode = document.getElementsByClassName('gif-info')[0].children[0];
+			console.log("parentnode is: ", parentnode);
             resolve();
         }, timer);
     });
@@ -129,7 +130,8 @@ function main(){
 				while (!parentnode) { await __delay__(1000); }
 				add_details(mp4link);
 			}, 1);
-		};
+		}
+		else { console.log("Didn't find any mp4 link to display!"); };
 		/*sleep(6000).then(() => {
 	// go to mp4 directly after 6 seconds (not used)
 	location.assign(mp4);
