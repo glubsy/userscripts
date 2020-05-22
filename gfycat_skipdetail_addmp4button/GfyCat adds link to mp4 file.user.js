@@ -2,16 +2,23 @@
 // @name         GfyCat adds link to mp4 file
 // @namespace    gfycataddmp4link
 // @description  Adds a link to the mp4 file of gfycat webm, redirects from detail page to actual file page
-// @version      0.11
+// @version      0.12
 // @author       https://greasyfork.org/scripts/32493-gfycat-redirect-to-webm-video-file forked by glub
 // @updateURL    https://greasyfork.org/en/scripts/34139-gfycat-adds-link-to-mp4-file
-// @match        http*://gfycat.com/*
-// @match        http*://redgifs.com/*
+// @match        http*://*.gfycat.com/*
+// @match        http*://*.redgifs.com/*
+// @match        http*://*.gifdeliverynetwork.com/*
 // @grant        none
 // @run-at       document-end
 // ==/UserScript==
 
-//FIXME: broken code here
+//HACK: in case we just want to redirect from this
+// if(window.location.hostname.indexOf("gifdeliverynetwork.com") > 0)
+// {
+//    window.location = window.location.href.replace(/gifdeliverynetwork.com/i, "redgifs.com/watch");
+// }
+
+//FIXME: broken code here, currently not used
 function add_detail_element(url){
 	var detailelement = document.getElementById('block-2');
 	var myanchor = document.createElement("a");
@@ -28,23 +35,9 @@ function add_detail_element(url){
 	detailelement.appendChild(myanchor);
 }
 
-var parentnode;
-
-function __delay__(timer) {
-// https://stackoverflow.com/questions/7307983
-	return new Promise(resolve => {
-        timer = timer || 3000;
-        setTimeout(function () {
-			parentnode = document.getElementsByClassName('gif-info')[0].children[0];
-			console.log("parentnode is: ", parentnode);
-            resolve();
-        }, timer);
-    });
-};
-
 /* need to wait a few seconds otherwise gfycrap scripts overwrite us
    we could also try using $(document).ready(function(){[...]}); */
-function add_details(url){
+function add_details(url, parentnode){
 	let newdiv = document.createElement("div");
 	// let mp4text = document.createTextNode("Download MP4");
 	// let webmtext = document.createTextNode("Download WEBM");
@@ -64,6 +57,12 @@ function add_details(url){
 	parentnode.appendChild(mp4lnk);
 	parentnode.appendChild(document.createElement("br"));
 	parentnode.appendChild(webmlnk);
+	// adding a bunch of spaces for padding
+	parentnode.appendChild(document.createElement("br"));
+	parentnode.appendChild(document.createElement("br"));
+	parentnode.appendChild(document.createElement("br"));
+	parentnode.appendChild(document.createElement("br"));
+	parentnode.appendChild(document.createElement("br"));
 
 	// grey out visited links
 	var css = 'a:visited { color: #4c4c5daa }';
@@ -77,7 +76,31 @@ function sleep(ms) {
 }
 
 var webmlink, mp4link;
+
 function main(){
+
+	var parentnode;
+
+	function __delay__(timer) {
+		// https://stackoverflow.com/questions/7307983
+		return new Promise(resolve => {
+			timer = timer || 3000;
+			setTimeout(function () {
+				var gifinfo = document.getElementsByClassName('gif-info');
+				if (gifinfo.length === 0)
+				{
+					// try different method as a fallback for gifdeliverynetwork (redirected) pages as they have no gif-info
+					parentnode = document.getElementsByClassName('wrapper')[0];
+				}
+				else
+				{
+					parentnode = gifinfo[0].children[0];
+				}
+				//console.log("parentnode is: ", parentnode);
+				resolve();
+			}, timer);
+		});
+	};
 	// Gfycat has been redirecting to the detail page when trying to access a file page directly
 	// gifycat.com/gifs/detail/id
 	// work around that by adding a timer to redirect after 5 seconds
@@ -104,7 +127,7 @@ function main(){
 		}
 		else {
 			// we don't have a videoplayer (yet?)
-			// FIXME: broken old code here
+			// FIXME: broken old code here, currently not used
 			var superAwesomeGlobalGfyJSON = document.getElementById('webmSource').src;
 			webmlink = document.getElementById('webmSource').src;
 			//webm = superAwesomeGlobalGfyJSON.webmUrl;
@@ -128,7 +151,7 @@ function main(){
 		if (mp4link) {
 			setTimeout(async function(){
 				while (!parentnode) { await __delay__(1000); }
-				add_details(mp4link);
+				add_details(mp4link, parentnode);
 			}, 1);
 		}
 		else { console.log("Didn't find any mp4 link to display!"); };
