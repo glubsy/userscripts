@@ -2,9 +2,10 @@
 // @name            GFYCAT | Show all Download Links (GIF, MP4, WEBP, WEBM)
 // @namespace       de.sidneys.userscripts
 // @homepage        https://gist.githubusercontent.com/sidneys/1af7b31282fa5019b6213d48e3b47c88/raw/
-// @version         2.0.0
+// @version         2.0.1
 // @description     Adds direct links to all image (.gif, .webp) and video (.mp4, .webm) formats and sizes on Gfycat.
 // @author          sidneys
+// @updateURL       https://greasyfork.org/scripts/408129-gfycat-show-all-download-links-gif-mp4-webp-webm/code/GFYCAT%20%7C%20Show%20all%20Download%20Links%20(GIF,%20MP4,%20WEBP,%20WEBM).user.js
 // @icon            https://gfycat.com/assets/apple-touch-icon/apple-touch-icon-180x180.png
 // @include         http*://*.gfycat.com/*
 // @include         http*://gfycat.com/*
@@ -22,8 +23,17 @@
  * @global
  */
 /* global onElementReady */
-Debug = false
+let Debug = false
 
+const formats = {
+'mp4': {'type' : 'video/mp4', 'name': 'MP4', 'def_size': 'large'},
+'webm': {'type': 'image/webm', 'name': 'WEBM', 'def_size': ''},
+'webp': {'type': 'image/webp', 'name': 'WEBP', 'def_size': ''},
+'max5mbGif': {'type': 'image/gif', 'name': 'GIF', 'def_size': '< 5M'},
+'max2mbGif': {'type': 'image/gif', 'name': 'GIF', 'def_size': '< 2M'},
+'max1mbGif': {'type': 'image/gif', 'name': 'GIF', 'def_size': '< 1M'},
+'mobile': {'type': 'video/mp4', 'name': 'MOBILE', 'def_size': 'mobile'}
+}
 
 /**
  * Inject Stylesheet
@@ -145,18 +155,20 @@ let addButtons = (targetElement, gifInfo, callback = () => {}) => {
     // Create link menu from gifInfo.content_urls property
     const containerElement = document.createElement('div')
     containerElement.className = 'gif-views gif-info__direct-download-links'
-    containerElement.innerHTML = `
-        <h4>GIF Name:</h4>
-        <p>${gifInfo.gfyName}</p>
-        <h4>GIF Download Links:</h4>
-        <a href="${gifInfo.max5mbGif}" target="_blank" type="image/gif">GIF (${!!gifInfo.content_urls.largeGif ? bytesToSize(gifInfo.content_urls.largeGif.size) : 'large'})</a>
-        <a href="${gifInfo.max2mbGif}" target="_blank" type="image/gif">GIF (${!!gifInfo.content_urls.max2mbGif ? bytesToSize(gifInfo.content_urls.max2mbGif.size) : '< 2M'})</a>
-        <a href="${gifInfo.max1mbGif}" target="_blank" type="image/gif">GIF (${!!gifInfo.content_urls.max1mbGif ? bytesToSize(gifInfo.content_urls.max1mbGif.size) : '< 1M'})</a>
-        <a href="${gifInfo.mp4Url}" target="_blank" type="video/mp4">MP4 (${!!gifInfo.mp4Size ? bytesToSize(gifInfo.mp4Size) : 'large'})</a>
-        <a href="${gifInfo.mobileUrl}" target="_blank" type="video/mp4">MP4 (${!!gifInfo.content_urls.mobile ? bytesToSize(gifInfo.content_urls.mobile.size) : 'mobile'})</a>
-        <a href="${gifInfo.webpUrl}" target="_blank" type="image/webp">WEBP (${!!gifInfo.content_urls.webp ? bytesToSize(gifInfo.content_urls.webp.size) : ''})</a>
-        <a href="${gifInfo.webmUrl}" target="_blank" type="video/webm">WEBM ${!!gifInfo.webmSize ? '(' + bytesToSize(gifInfo.webmSize) + ')' : ''}</a>
-    `
+
+    let inner_html = `
+<h4>GIF Name:</h4>
+<p>${gifInfo.gfyName}</p>
+<h4>GIF Download Links:</h4>`
+
+    for (const [key, value] of Object.entries(formats)) {
+        if (!gifInfo.content_urls[key]) {
+            continue
+        }
+        inner_html += `<a href="${gifInfo.content_urls[key]}" target="_blank" type="${value.type}">${value.name} (${!!gifInfo.content_urls[key].size ? bytesToSize(gifInfo.content_urls[key].size) : value.def_size})</a>`
+    }
+
+    containerElement.innerHTML = inner_html;
 
     // Render link menu
     targetElement.insertBefore(containerElement, targetElement.firstChild.nextSibling)
