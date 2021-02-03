@@ -2,9 +2,8 @@
 // @name         GfyCat adds link to mp4 file
 // @namespace    gfycataddmp4link
 // @description  Adds a link to the mp4 file of gfycat webm, redirects from detail page to actual file page
-// @version      0.14
+// @version      0.15
 // @author       https://greasyfork.org/scripts/32493-gfycat-redirect-to-webm-video-file forked by glub
-// @updateURL    https://greasyfork.org/en/scripts/34139-gfycat-adds-link-to-mp4-file
 // @match        http*://*.gfycat.com/*
 // @match        http*://*.redgifs.com/*
 // @match        http*://*.gifdeliverynetwork.com/*
