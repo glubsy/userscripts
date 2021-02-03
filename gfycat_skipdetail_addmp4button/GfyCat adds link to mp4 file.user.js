@@ -2,7 +2,7 @@
 // @name         GfyCat adds link to mp4 file
 // @namespace    gfycataddmp4link
 // @description  Adds a link to the mp4 file of gfycat webm, redirects from detail page to actual file page
-// @version      0.13
+// @version      0.14
 // @author       https://greasyfork.org/scripts/32493-gfycat-redirect-to-webm-video-file forked by glub
 // @updateURL    https://greasyfork.org/en/scripts/34139-gfycat-adds-link-to-mp4-file
 // @match        http*://*.gfycat.com/*
@@ -37,32 +37,19 @@ function add_detail_element(url){
 
 /* need to wait a few seconds otherwise gfycrap scripts overwrite us
    we could also try using $(document).ready(function(){[...]}); */
-function add_details(url, parentnode){
+function add_details(url, type, parentnode){
 	let newdiv = document.createElement("div");
 	// let mp4text = document.createTextNode("Download MP4");
 	// let webmtext = document.createTextNode("Download WEBM");
 	// newdiv.appendChild(mp4text);
 	// newdiv.appendChild(webmtext);
-	let mp4lnk = document.createElement("a");
-	let webmlnk = document.createElement("a");
-	mp4lnk.innerText = "Download MP4 here.";
-	webmlnk.innerText = "Download WEBM here.";
-	mp4lnk.setAttribute('href', mp4link);
-	mp4lnk.setAttribute('class', 'value');
-	mp4lnk.setAttribute('target', '_blank');
-	webmlnk.setAttribute('href', webmlink);
-	webmlnk.setAttribute('target', '_blank');
-	webmlnk.setAttribute('class', 'value');
+	let final_link = document.createElement("a");
+	final_link.innerText = "Download " + type.toUpperCase() + " here.";
+	final_link.setAttribute('href', url);
+	final_link.setAttribute('class', 'value');
+	final_link.setAttribute('target', '_blank');
 	parentnode.appendChild(document.createElement("br"));
-	parentnode.appendChild(mp4lnk);
-	parentnode.appendChild(document.createElement("br"));
-	parentnode.appendChild(webmlnk);
-	// adding a bunch of spaces for padding
-	parentnode.appendChild(document.createElement("br"));
-	parentnode.appendChild(document.createElement("br"));
-	parentnode.appendChild(document.createElement("br"));
-	parentnode.appendChild(document.createElement("br"));
-	parentnode.appendChild(document.createElement("br"));
+	parentnode.appendChild(final_link);
 
 	// grey out visited links
 	var css = 'a:visited { color: #4c4c5daa }';
@@ -75,22 +62,39 @@ function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-var webmlink, mp4link;
+// var webmlink, mp4link;
+var links = {};
 
-// This is the function that does the magic currently
-function updateInfoFrom(videoPlayer){
+// This is the function that does everything currently
+function updateInfoFrom(videoPlayer) {
 	var children = videoPlayer.childNodes;
-	console.log("DEBUG: player child nodes: ", children);
-	for (var i = 0; i < children.length; ++i) {
-		if (children[i].type == "video/webm") {
-			webmlink = children[i].src;
+	// console.log("DEBUG: player child nodes: ", children);
+	children.forEach((child) => {
+		console.log("Child of children:", child);
+		let _link;
+		if (child.type == "video/webm") {
+			links.webm = child.src;
+			_link = child.src;
 		}
-		if (children[i].type == "video/mp4"){
-			if (children[i].src.indexOf('-mobile') != -1){ continue; }
-			mp4link = children[i].src;
+		if (child.type == "video/mp4") {
+			if (child.src.indexOf('-mobile') != -1) {
+				return;
+			}
+			links.mp4 = child.src;
+			_link = child.src;
 		}
+	});
+
+	if (!links.webm) {
+		// GFYCrap have removed webm and only display mp4, but webm link might still work
+		// so reconstruct the link from the mp4 link
+		// webmlink = mp4link.split('.mp4')[0].concat('.webm');
+		links.webm = links.mp4.split('.mp4').shift() + ".webm";
+		// console.log(`Rebuilt missing webm to "${links.webm}"`);
 	}
-	addLink();
+
+	// console.log(`Adding links MP4: ${links.mp4}, WEBM: ${links.webm}`);
+	addLinks();
 }
 
 var parentnode;
@@ -135,9 +139,9 @@ else
 		// we don't have a videoplayer (yet?)
 		// FIXME: broken old code here, currently not used
 		var superAwesomeGlobalGfyJSON = document.getElementById('webmSource').src;
-		webmlink = document.getElementById('webmSource').src;
+		links.webm = document.getElementById('webmSource').src;
 		//webm = superAwesomeGlobalGfyJSON.webmUrl;
-		mp4link = document.getElementById('mp4Source').src;
+		links.mp4 = document.getElementById('mp4Source').src;
 		//mp4link = superAwesomeGlobalGfyJSON.mp4Url;
 		//var caption = document.getElementsByTagName('figcaption')[0].innerHTML;
 		var source_url = superAwesomeGlobalGfyJSON.url;
@@ -153,19 +157,24 @@ else
 			add_detail_element(null);
 		}
 	}
-	//addLink();
+	//addLinks();
 }
 
-function addLink() {
-	if (mp4link) {
-		setTimeout(async function(){
+function addLinks() {
+	if (Object.keys(links).length == 0) {
+		console.log("Didn't find any mp4 link to display!");
+		return;
+	}
+	Object.values(links).forEach((link, idx) => {
+	if (link) {
+		setTimeout(async function() {
 			while (!parentnode) { await __delay__(1000); }
-			add_details(mp4link, parentnode);
+			add_details(link, Object.keys(links)[idx] , parentnode);
 		}, 1);
 	}
-	else { console.log("Didn't find any mp4 link to display!"); };
 	/*sleep(6000).then(() => {
 // go to mp4 directly after 6 seconds (not used)
 location.assign(mp4);
 });*/
+	});
 }
